@@ -39,6 +39,7 @@
     <a href="#challenge">ประเด็นท้าทาย</a>
     <a href="#indicators">ตัวชี้วัด</a>
     <a href="#awards">ผลงาน</a>
+    <a href="#tinkercad">Tinkercad</a>
     <a href="#gallery">กิจกรรม</a>
     <a href="#policy">นโยบาย</a>
   </nav>
@@ -77,6 +78,21 @@
       <li><b data-count="193">0</b><span>ร่องรอยหลักฐาน</span></li>
     </ul>
   </div>
+  <aside class="picker" id="picker" aria-label="เลือกธาตุเพื่อเปลี่ยนแบบจำลองอะตอม">
+    <div class="picker__card" id="elCard" aria-live="polite">
+      <div class="picker__z"><span id="elZ">11</span><small>เลขอะตอม</small></div>
+      <div class="picker__sym" id="elSym">Na</div>
+      <div class="picker__name"><b id="elTh">โซเดียม</b><span id="elEn">Sodium</span></div>
+      <dl class="picker__meta">
+        <div><dt>เลขมวล</dt><dd id="elMass">23</dd></div>
+        <div><dt>โปรตอน / นิวตรอน</dt><dd id="elPN">11 / 12</dd></div>
+        <div><dt>การจัดเรียงอิเล็กตรอน</dt><dd id="elShells">2, 8, 1</dd></div>
+        <div><dt>หมู่ธาตุ</dt><dd id="elCat">โลหะแอลคาไล</dd></div>
+      </dl>
+    </div>
+    <div class="picker__table" id="miniTable" role="group" aria-label="ตารางธาตุ 36 ธาตุแรก"></div>
+    <p class="picker__hint">แตะธาตุเพื่อเปลี่ยนอะตอม · แบบจำลองของบอร์ (Bohr Model) · ทอง = โปรตอน · ม่วง = นิวตรอน</p>
+  </aside>
   <div class="hero__scroll" aria-hidden="true"><span></span>เลื่อนเพื่ออ่าน</div>
 </section>
 
@@ -208,6 +224,16 @@
   </div>
 </section>
 
+<!-- ===== Tinkercad ===== -->
+<section class="chapter tinker" id="tinkercad">
+  <div class="chapter__head">
+    <span class="chapter__num">พิเศษ</span>
+    <h2>ผลงาน 3 มิติของนักเรียนใน Tinkercad</h2>
+    <p>ผลงานการออกแบบและสร้างแบบจำลอง 3 มิติของนักเรียน — หมุน ซูม และสำรวจได้จริงในหน้านี้</p>
+  </div>
+  <div class="tinker__grid" id="tinkerGrid"></div>
+</section>
+
 <!-- ===== Gallery ===== -->
 <section class="chapter gallery" id="gallery">
   <div class="chapter__head">
@@ -292,6 +318,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="js/elements.js"></script>
 <script src="js/data.js"></script>
 <script src="js/scene.js"></script>
 <script src="js/main.js"></script>

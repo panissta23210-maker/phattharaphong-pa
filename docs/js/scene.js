@@ -1,4 +1,4 @@
-/* scene.js — 3D atom hero (Three.js r128) */
+/* scene.js — Bohr-model atom hero (Three.js r128). window.ATOM.set(Z) switches element. */
 (() => {
   const canvas = document.getElementById('scene');
   if (!canvas || !window.THREE) return;
@@ -12,19 +12,10 @@
   const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
   camera.position.set(0, 0.4, 11);
 
-  const GOLD = 0xE6C27A, AURA = 0xB44BFF, INDIGO = 0x7F8CFF;
+  const GOLD = 0xE6C27A, AURA = 0xB44BFF, INDIGO = 0x7F8CFF, CHAMP = 0xFFF1C9;
+  const SHELL_COLORS = [GOLD, AURA, INDIGO, CHAMP];
 
-  /* ---- nucleus: cluster of gold spheres ---- */
-  const atom = new THREE.Group();
-  scene.add(atom);
-  const nucleus = new THREE.Group();
-  const nMat = new THREE.MeshStandardMaterial({ color: GOLD, metalness: 0.9, roughness: 0.25, emissive: 0x3a2a08, emissiveIntensity: 0.6 });
-  const nGeo = new THREE.SphereGeometry(0.34, 32, 32);
-  const offsets = [[0, 0, 0], [0.42, 0.18, 0.1], [-0.36, 0.3, -0.2], [0.1, -0.42, 0.28], [-0.2, -0.2, -0.4], [0.3, -0.1, -0.38], [-0.4, -0.05, 0.3]];
-  offsets.forEach(o => { const m = new THREE.Mesh(nGeo, nMat); m.position.set(...o); nucleus.add(m); });
-  atom.add(nucleus);
-
-  /* ---- glow sprite behind nucleus ---- */
+  /* ---- shared textures/geometries ---- */
   const glowTex = (() => {
     const c = document.createElement('canvas'); c.width = c.height = 256;
     const g = c.getContext('2d');
@@ -34,36 +25,97 @@
     g.fillStyle = grd; g.fillRect(0, 0, 256, 256);
     return new THREE.CanvasTexture(c);
   })();
-  const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
-  glow.scale.set(4.2, 4.2, 1);
-  atom.add(glow);
-
-  /* ---- orbit rings + electrons ---- */
-  const rings = [];
-  const ringDefs = [
-    { r: 2.6, tilt: [1.1, 0.0, 0.3], color: AURA, speed: 0.55, n: 2 },
-    { r: 3.4, tilt: [0.5, 1.0, -0.6], color: GOLD, speed: -0.38, n: 3 },
-    { r: 4.2, tilt: [-0.9, 0.4, 1.2], color: INDIGO, speed: 0.27, n: 3 }
-  ];
+  const protonMat = new THREE.MeshStandardMaterial({ color: GOLD, metalness: 0.9, roughness: 0.25, emissive: 0x3a2a08, emissiveIntensity: 0.6 });
+  const neutronMat = new THREE.MeshStandardMaterial({ color: 0x6E4BA8, metalness: 0.6, roughness: 0.35, emissive: 0x1a0f33, emissiveIntensity: 0.8 });
+  const nucGeo = new THREE.SphereGeometry(1, 20, 20);
   const eGeo = new THREE.SphereGeometry(0.11, 16, 16);
-  ringDefs.forEach(d => {
-    const g = new THREE.Group();
-    g.rotation.set(...d.tilt);
-    const ring = new THREE.Mesh(new THREE.TorusGeometry(d.r, 0.012, 8, 220),
-      new THREE.MeshBasicMaterial({ color: d.color, transparent: true, opacity: 0.55 }));
-    g.add(ring);
-    const electrons = [];
-    for (let i = 0; i < d.n; i++) {
-      const e = new THREE.Mesh(eGeo, new THREE.MeshBasicMaterial({ color: d.color }));
-      const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: d.color, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
-      s.scale.set(0.9, 0.9, 1); e.add(s);
-      g.add(e); electrons.push({ mesh: e, phase: (i / d.n) * Math.PI * 2 });
-    }
-    atom.add(g);
-    rings.push({ g, d, electrons });
-  });
 
-  /* ---- particle field (BufferGeometry + Points) ---- */
+  /* ---- atom root (swappable) ---- */
+  const root = new THREE.Group(); scene.add(root);
+  let atom = null;           // current atom group
+  let rings = [];            // [{d:{r,speed}, electrons:[{mesh,phase}]}]
+  let nucleus = null;
+
+  // Fibonacci-sphere packing for nucleons
+  function packPositions(n, R) {
+    const pts = []; if (n === 1) return [[0, 0, 0]];
+    const layers = Math.max(1, Math.round(Math.cbrt(n / 3)));
+    let placed = 0;
+    for (let L = 0; L < layers && placed < n; L++) {
+      const rr = R * (L + 0.55) / layers;
+      const count = L === layers - 1 ? n - placed : Math.max(1, Math.round(n * ((L + 1) ** 3 - L ** 3) / layers ** 3));
+      const golden = Math.PI * (3 - Math.sqrt(5));
+      for (let i = 0; i < count && placed < n; i++, placed++) {
+        const y = 1 - (i / Math.max(1, count - 1)) * 2, rad = Math.sqrt(1 - y * y), th = golden * i;
+        pts.push([Math.cos(th) * rad * rr, y * rr, Math.sin(th) * rad * rr]);
+      }
+    }
+    return pts;
+  }
+
+  function buildAtom(el) {
+    const g = new THREE.Group();
+    // nucleus: protons (gold) + neutrons (violet), instanced
+    const Z = el.z, N = Math.max(0, el.mass - el.z), A = Z + N;
+    const R = 0.28 * Math.cbrt(A) * 0.92;
+    const size = 0.26 * Math.pow(A, -0.12) * 1.35;
+    const pts = packPositions(A, R);
+    // shuffle to interleave protons/neutrons
+    for (let i = pts.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pts[i], pts[j]] = [pts[j], pts[i]]; }
+    const nuc = new THREE.Group();
+    const mk = (count, mat, offset) => {
+      if (!count) return;
+      const im = new THREE.InstancedMesh(nucGeo, mat, count);
+      const m = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(size, size, size);
+      for (let i = 0; i < count; i++) { const p = pts[offset + i]; m.compose(new THREE.Vector3(p[0], p[1], p[2]), q, s); im.setMatrixAt(i, m); }
+      im.instanceMatrix.needsUpdate = true; nuc.add(im);
+    };
+    mk(Z, protonMat, 0); mk(N, neutronMat, Z);
+    g.add(nuc);
+    // glow
+    const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+    const gs = 3.2 + R * 2.2; glow.scale.set(gs, gs, 1); g.add(glow);
+    // shells
+    const rs = [];
+    el.shells.forEach((count, i) => {
+      const r = 1.75 + i * 0.9 + R * 0.6;
+      const color = SHELL_COLORS[i % SHELL_COLORS.length];
+      const sg = new THREE.Group();
+      sg.rotation.set(0.9 - i * 0.55, 0.35 * i, 0.4 + i * 0.7);
+      sg.add(new THREE.Mesh(new THREE.TorusGeometry(r, 0.012, 8, 220), new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.55 })));
+      const electrons = [];
+      for (let k = 0; k < count; k++) {
+        const e = new THREE.Mesh(eGeo, new THREE.MeshBasicMaterial({ color }));
+        const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+        s.scale.set(0.85, 0.85, 1); e.add(s);
+        sg.add(e); electrons.push({ mesh: e, phase: (k / count) * Math.PI * 2 });
+      }
+      g.add(sg);
+      rs.push({ g: sg, d: { r, speed: (i % 2 ? -1 : 1) * (0.62 - i * 0.11) }, electrons });
+    });
+    return { g, rs, nuc };
+  }
+
+  /* ---- swap with transition ---- */
+  let swapping = null;
+  function setElement(z) {
+    const el = window.ELEMENTS && window.ELEMENTS.byZ[z]; if (!el) return;
+    const next = buildAtom(el);
+    next.g.scale.setScalar(0.001);
+    root.add(next.g);
+    const prev = atom;
+    swapping = { prev, next: next.g, t: 0 };
+    atom = next.g; rings = next.rs; nucleus = next.nuc;
+    root.userData.z = z;
+    applyScale();
+    canvas.dispatchEvent(new CustomEvent('atomchange', { detail: el }));
+  }
+  function disposeGroup(g) {
+    g.traverse(o => { if (o.geometry && o.geometry !== nucGeo && o.geometry !== eGeo) o.geometry.dispose(); if (o.material && o.material !== protonMat && o.material !== neutronMat) { if (o.material.map && o.material.map !== glowTex) o.material.map.dispose(); o.material.dispose(); } });
+    root.remove(g);
+  }
+
+  /* ---- particle field ---- */
   const COUNT = isMobile ? 500 : 1200;
   const pos = new Float32Array(COUNT * 3), col = new Float32Array(COUNT * 3), sz = new Float32Array(COUNT);
   const cGold = new THREE.Color(GOLD), cAura = new THREE.Color(AURA), cInd = new THREE.Color(INDIGO);
@@ -84,8 +136,7 @@
     vertexShader: `attribute float aSize; varying vec3 vC; varying float vA; uniform float uTime; uniform float uPR;
       void main(){ vC = color; vec3 p = position; p.y += sin(uTime*0.4 + position.x*0.5)*0.25;
         vec4 mv = modelViewMatrix * vec4(p,1.0); gl_Position = projectionMatrix * mv;
-        float tw = 0.65 + 0.35*sin(uTime*1.3 + position.z*2.0);
-        vA = tw; gl_PointSize = aSize * uPR * 18.0 / -mv.z; }`,
+        vA = 0.65 + 0.35*sin(uTime*1.3 + position.z*2.0); gl_PointSize = aSize * uPR * 18.0 / -mv.z; }`,
     fragmentShader: `varying vec3 vC; varying float vA;
       void main(){ float d = length(gl_PointCoord - 0.5); if(d>0.5) discard;
         float a = smoothstep(0.5,0.05,d) * vA; gl_FragColor = vec4(vC, a*0.85); }`
@@ -107,9 +158,16 @@
   function resize() {
     const w = canvas.clientWidth || innerWidth, h = canvas.clientHeight || innerHeight;
     renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
-    atom.scale.setScalar(isMobile ? 0.55 : (w < 1100 ? 0.8 : 1));
-    atom.position.x = isMobile ? 0 : (w < 1100 ? 2.6 : 3.9);
-    atom.userData.baseY = isMobile ? 2.3 : 0.2;
+    root.userData.baseScale = isMobile ? 0.46 : (w < 1100 ? 0.78 : 1.0);
+    applyScale();
+    root.position.x = isMobile ? 0 : (w < 1100 ? 2.6 : 3.9);
+    root.userData.baseY = isMobile ? 2.9 : 1.1;
+  }
+  function applyScale() {
+    const el = window.ELEMENTS && window.ELEMENTS.byZ[root.userData.z];
+    const n = el ? el.shells.length : 3;
+    const k = n > 3 ? 3 / n : (n < 2 ? 1.15 : 1);
+    root.scale.setScalar((root.userData.baseScale || 1) * k);
   }
   addEventListener('resize', resize); resize();
 
@@ -117,28 +175,41 @@
   let visible = true;
   new IntersectionObserver(([e]) => { visible = e.isIntersecting; }, { threshold: 0 }).observe(canvas);
 
+  const easeOut = x => 1 - Math.pow(1 - x, 3);
   function frame() {
     requestAnimationFrame(frame);
     if (!visible) return;
     const t = clock.getElapsedTime();
+    const dt = Math.min(0.05, clock.getDelta() || 0.016);
     cur.x += (target.x - cur.x) * 0.05; cur.y += (target.y - cur.y) * 0.05;
     const spin = reduce ? 0 : t;
-    atom.rotation.y = spin * 0.12 + cur.x * 0.45;
-    atom.rotation.x = cur.y * 0.3 + Math.sin(spin * 0.2) * 0.08;
-    atom.position.y = (atom.userData.baseY || 0.2) + Math.sin(spin * 0.6) * 0.12 - Math.min(scrollY, 900) * 0.0012;
-    nucleus.rotation.y = -spin * 0.5; nucleus.rotation.z = spin * 0.3;
+
+    // swap transition
+    if (swapping) {
+      swapping.t = Math.min(1, swapping.t + (reduce ? 1 : dt * 1.6));
+      const k = easeOut(swapping.t);
+      swapping.next.scale.setScalar(0.001 + k * 0.999);
+      swapping.next.rotation.y = (1 - k) * 1.2;
+      if (swapping.prev) { const s = 1 - k; swapping.prev.scale.setScalar(Math.max(0.001, s)); swapping.prev.rotation.y = -k * 1.2; }
+      if (swapping.t >= 1) { if (swapping.prev) disposeGroup(swapping.prev); swapping = null; }
+    }
+
+    root.rotation.y = spin * 0.12 + cur.x * 0.45;
+    root.rotation.x = cur.y * 0.3 + Math.sin(spin * 0.2) * 0.08;
+    root.position.y = (root.userData.baseY || 0.3) + Math.sin(spin * 0.6) * 0.12 - Math.min(scrollY, 900) * 0.0012;
+    if (nucleus) { nucleus.rotation.y = -spin * 0.5; nucleus.rotation.z = spin * 0.3; }
     rings.forEach(({ g, d, electrons }) => {
       g.rotation.z += reduce ? 0 : 0.0006;
-      electrons.forEach(e => {
-        const a = spin * d.speed + e.phase;
-        e.mesh.position.set(Math.cos(a) * d.r, Math.sin(a) * d.r, 0);
-      });
+      electrons.forEach(e => { const a = spin * d.speed + e.phase; e.mesh.position.set(Math.cos(a) * d.r, Math.sin(a) * d.r, 0); });
     });
     pMat.uniforms.uTime.value = spin;
     camera.position.x += (cur.x * 0.8 - camera.position.x) * 0.04;
     camera.position.y += (0.4 - cur.y * 0.5 - camera.position.y) * 0.04;
-    camera.lookAt(atom.position.x * 0.55, 0.2, 0);
+    camera.lookAt(root.position.x * 0.55, 0.2, 0);
     renderer.render(scene, camera);
   }
+
+  window.ATOM = { set: setElement, get: () => root.userData.z };
+  setElement(11); // โซเดียม — ธาตุตั้งต้น (Na จากเรื่องกรด–เบส)
   frame();
 })();

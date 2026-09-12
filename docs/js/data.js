@@ -212,5 +212,10 @@ window.PA = (() => {
     ['มีวินัยและรักษาวินัย', 'ปฏิบัติตามกฎระเบียบ ลงเวลาด้วยตนเองทุกวัน ลาตามระเบียบ ไม่เคยถูกลงโทษทางวินัย']
   ];
 
-  return { img, th, pic, pa, ind, gallery, certs, policy, ethics };
+  /* ---------- ผลงานนักเรียนใน Tinkercad ----------
+     เพิ่มรายการได้เลย: { title:'ชื่อผลงาน', student:'ชื่อนักเรียน', level:'ม.2/1', desc:'คำอธิบายสั้น ๆ',
+       url:'https://www.tinkercad.com/things/XXXXXXXX', img:'assets/img/tinkercad/xxx.jpg' (ไม่บังคับ) } */
+  const tinkercad = [];
+
+  return { img, th, pic, pa, ind, gallery, certs, policy, ethics, tinkercad };
 })();

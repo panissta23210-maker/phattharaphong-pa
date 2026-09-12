@@ -285,3 +285,77 @@
     });
   }
 })();
+
+/* ===================== Element picker → 3D atom ===================== */
+(() => {
+  const E = window.ELEMENTS; if (!E) return;
+  const table = document.getElementById('miniTable'), card = document.getElementById('elCard');
+  if (!table) return;
+  const cells = {};
+  // 4 periods × 18 groups; fill gaps for layout
+  for (let row = 1; row <= 4; row++) {
+    for (let col = 1; col <= 18; col++) {
+      const el = E.list.find(e => e.row === row && e.col === col);
+      if (!el) { const g = document.createElement('span'); g.className = 'pel gap'; table.appendChild(g); continue; }
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'pel'; b.dataset.z = el.z; b.textContent = el.sym;
+      b.style.setProperty('--pc', el.color);
+      b.setAttribute('aria-label', `${el.th} (${el.sym}) เลขอะตอม ${el.z}`);
+      b.title = `${el.th} · ${el.en}`;
+      b.addEventListener('click', () => window.ATOM && window.ATOM.set(el.z));
+      cells[el.z] = b; table.appendChild(b);
+    }
+  }
+  const $id = id => document.getElementById(id);
+  function render(el) {
+    Object.values(cells).forEach(c => c.classList.toggle('active', +c.dataset.z === el.z));
+    card.style.setProperty('--el-c', el.color);
+    $id('elZ').textContent = el.z; $id('elSym').textContent = el.sym;
+    $id('elTh').textContent = el.th; $id('elEn').textContent = el.en;
+    $id('elMass').textContent = el.mass; $id('elPN').textContent = `${el.z} / ${el.mass - el.z}`;
+    $id('elShells').textContent = el.shells.join(', '); $id('elCat').textContent = el.catTh;
+    if (window.gsap && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      gsap.fromTo('#elSym', { y: 10, opacity: 0 }, { y: 0, opacity: 1, duration: .5, ease: 'expo.out' });
+    }
+  }
+  document.getElementById('scene').addEventListener('atomchange', e => render(e.detail));
+  // keyboard: arrows move between elements
+  table.addEventListener('keydown', e => {
+    const cur = +((document.activeElement || {}).dataset || {}).z; if (!cur) return;
+    const d = { ArrowRight: 1, ArrowLeft: -1 }[e.key]; if (!d) return;
+    const nz = Math.min(36, Math.max(1, cur + d)); cells[nz].focus(); window.ATOM.set(nz); e.preventDefault();
+  });
+  const cur = window.ATOM && window.ATOM.get(); if (cur) render(E.byZ[cur]);
+  const picker = document.getElementById('picker'); if (picker) picker.dataset.in = 6;
+})();
+
+/* ===================== Tinkercad student works ===================== */
+(() => {
+  const grid = document.getElementById('tinkerGrid'); if (!grid) return;
+  const works = (window.PA && window.PA.tinkercad) || [];
+  if (!works.length) {
+    grid.innerHTML = `<div class="tk tk--empty"><b>กำลังรวบรวมผลงานนักเรียน</b><span>ผลงาน 3 มิติจาก Tinkercad ของนักเรียนจะแสดงในส่วนนี้ — เปิดหมุนดูได้จริง</span></div>`;
+    return;
+  }
+  const embedUrl = u => {
+    const m = String(u).match(/tinkercad\.com\/(?:things|embed)\/([A-Za-z0-9]+)/);
+    return m ? `https://www.tinkercad.com/embed/${m[1]}?editbtn=0` : u;
+  };
+  grid.innerHTML = works.map((w, i) => `
+    <article class="tk">
+      <div class="tk__frame" data-src="${embedUrl(w.url)}">
+        <button class="tk__cover" type="button" aria-label="โหลดโมเดล 3 มิติ ${w.title}">
+          ${w.img ? `<img src="${w.img}" alt="" loading="lazy">` : ''}
+          <span class="tk__play">▶ เปิดโมเดล 3 มิติ</span>
+        </button>
+      </div>
+      <div class="tk__body"><b>${w.title}</b><span>${w.student || ''}${w.level ? ' · ' + w.level : ''}${w.desc ? '<br>' + w.desc : ''}</span>
+        <a href="${w.url}" target="_blank" rel="noopener">เปิดใน Tinkercad</a></div>
+    </article>`).join('');
+  grid.addEventListener('click', e => {
+    const c = e.target.closest('.tk__cover'); if (!c) return;
+    const f = c.parentElement, ifr = document.createElement('iframe');
+    ifr.src = f.dataset.src; ifr.allowFullscreen = true; ifr.loading = 'lazy'; ifr.title = 'Tinkercad 3D model';
+    f.replaceChildren(ifr);
+  });
+})();
