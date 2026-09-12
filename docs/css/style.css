@@ -452,3 +452,27 @@ body.ready .hero [data-in="5"]{transition-delay:.6s}
 .tk--empty{grid-column:1/-1;padding:40px 30px;text-align:center;border-style:dashed}
 .tk--empty b{font-family:var(--font-d);font-size:22px;color:var(--gold);display:block;margin-bottom:8px}
 .tk--empty span{color:var(--ivory-dim);font-size:15px}
+
+/* ---------- Tinkercad (Arduino cards) ---------- */
+.tinker__grid{display:block}
+.tk__intro{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:18px 22px;margin-bottom:26px;border-radius:var(--r);border:1px solid var(--line);background:linear-gradient(160deg,rgba(91,42,134,.28),rgba(27,22,80,.25))}
+.tk__intro b{display:block;font-family:var(--font-d);font-size:22px;color:var(--gold);font-weight:600}
+.tk__intro span{display:block;font-size:14px;color:var(--ivory-dim);margin-top:2px}
+.tk__group{margin-bottom:34px}
+.tk__stu{display:flex;align-items:baseline;gap:14px;margin:0 0 14px;padding-bottom:8px;border-bottom:1px solid rgba(230,194,122,.15)}
+.tk__stu span{font-family:var(--font-d);font-size:24px;font-weight:600;color:var(--ivory);text-transform:capitalize}
+.tk__stu small{font-size:13px;color:var(--ivory-mute)}
+.tk__cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.tk .tk__frame{aspect-ratio:16/9;background:radial-gradient(70% 80% at 50% 40%,rgba(91,42,134,.35),rgba(7,5,13,.9))}
+.ard{position:absolute;inset:0;width:100%;height:100%}
+.led__dot{fill:#FFE9A8;filter:drop-shadow(0 0 4px #E6C27A)}
+.led__glow{fill:rgba(230,194,122,.25)}
+.tk--blink .led{animation:ledblink 1.2s var(--d,0s) steps(1) infinite}
+.tk--count .led{animation:ledpulse 2.4s var(--d,0s) ease-in-out infinite}
+.tk--tree .led-0{animation:ledpulse 1.8s 0s ease-in-out infinite}.tk--tree .led-1{animation:ledpulse 1.8s .3s ease-in-out infinite}.tk--tree .led-2{animation:ledpulse 1.8s .6s ease-in-out infinite}
+@keyframes ledblink{0%,49%{opacity:1}50%,100%{opacity:.15}}
+@keyframes ledpulse{0%,100%{opacity:.2}50%{opacity:1}}
+.tk--draft{opacity:.78}
+.tk--draft .tk__body b{color:var(--ivory-dim);font-size:16px}
+.tk__body b{font-size:17px}
+@media (prefers-reduced-motion:reduce){.led{animation:none!important}}

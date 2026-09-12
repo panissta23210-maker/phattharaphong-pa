@@ -212,10 +212,37 @@ window.PA = (() => {
     ['มีวินัยและรักษาวินัย', 'ปฏิบัติตามกฎระเบียบ ลงเวลาด้วยตนเองทุกวัน ลาตามระเบียบ ไม่เคยถูกลงโทษทางวินัย']
   ];
 
-  /* ---------- ผลงานนักเรียนใน Tinkercad ----------
-     เพิ่มรายการได้เลย: { title:'ชื่อผลงาน', student:'ชื่อนักเรียน', level:'ม.2/1', desc:'คำอธิบายสั้น ๆ',
-       url:'https://www.tinkercad.com/things/XXXXXXXX', img:'assets/img/tinkercad/xxx.jpg' (ไม่บังคับ) } */
-  const tinkercad = [];
+  /* ---------- ผลงานนักเรียนใน Tinkercad (ห้อง ม.6/2) ----------
+     embed:true ได้เมื่อผลงานตั้งเป็น Public แล้ว (ปิด Safe Mode ในห้องเรียน) */
+  const tinkercad = {
+    classroom: { name: 'ม.6/2', url: 'https://www.tinkercad.com/classrooms/45o0gpCk4w9', students: 3, tool: 'Tinkercad Circuits · Arduino UNO · C++' },
+    works: [
+      { id: '3TXcGX0x46c-', title: 'โปรแกรมต้นไม้', student: 'wanwisa', kind: 'tree', url: 'https://www.tinkercad.com/things/3TXcGX0x46c-', embed: false },
+      { id: 'dZVyz5u1vud-brilliant-elzing', title: 'Brilliant Elzing (แบบร่าง)', student: 'wanwisa', kind: 'draft', url: 'https://www.tinkercad.com/things/dZVyz5u1vud-brilliant-elzing', embed: false },
+      { id: '9PWV8mqfNGW-1-10', title: 'โปรแกรมนับเลข 1-10 ไม่มีถอยหลัง', student: 'arisa', kind: 'count', url: 'https://www.tinkercad.com/things/9PWV8mqfNGW-1-10', embed: false },
+      { id: 'h1S3PQOoHAt-neat-luulia-esboo', title: 'Neat Luulia-Esboo (แบบร่าง)', student: 'wiyada', kind: 'draft', url: 'https://www.tinkercad.com/things/h1S3PQOoHAt-neat-luulia-esboo', embed: false },
+      { id: '315IX7sNP2H-1-55-1', title: 'โปรแกรมนับเลขวน 1-5 แล้ว 5-1', student: 'wiyada', kind: 'count', url: 'https://www.tinkercad.com/things/315IX7sNP2H-1-55-1', embed: false },
+      { id: '582eMjepaEP-ingenious-wluff-snaget', title: 'Ingenious Wluff-Snaget (แบบร่าง)', student: 'wiyada', kind: 'draft', url: 'https://www.tinkercad.com/things/582eMjepaEP-ingenious-wluff-snaget', embed: false },
+      { id: '6mdlQweyjFY-', title: 'โปรแกรมต้นไม้', student: 'arisa', kind: 'tree', url: 'https://www.tinkercad.com/things/6mdlQweyjFY-', embed: false },
+      { id: '1M87tBAfhv5-sizzling-turing-blorr', title: 'Sizzling Turing-Blorr (แบบร่าง)', student: 'wiyada', kind: 'draft', url: 'https://www.tinkercad.com/things/1M87tBAfhv5-sizzling-turing-blorr', embed: false },
+      { id: '56yhOHQH59p-1-10', title: 'โปรแกรมนับเลข 1-10 วนซ้ำ', student: 'wiyada', kind: 'count', url: 'https://www.tinkercad.com/things/56yhOHQH59p-1-10', embed: false },
+      { id: 'hRKwjeQc97V-1-10', title: 'โปรแกรมนับเลข 1-10 วนซ้ำ', student: 'wanwisa', kind: 'count', url: 'https://www.tinkercad.com/things/hRKwjeQc97V-1-10', embed: false },
+      { id: '5LoFXPgBB6t-1-55-1', title: 'โปรแกรมนับเลขวน 1-5 แล้ว 5-1', student: 'arisa', kind: 'count', url: 'https://www.tinkercad.com/things/5LoFXPgBB6t-1-55-1', embed: false },
+      { id: '6BbsFKtRrzv-1-55-1', title: 'โปรแกรมนับ 1-5 แล้วนับ 5-1', student: 'wanwisa', kind: 'count', url: 'https://www.tinkercad.com/things/6BbsFKtRrzv-1-55-1', embed: false },
+      { id: 'i7v8JWWPScL-1-55-1', title: 'โปรแกรมนับเลขวน 1-5 แล้ว 5-1', student: 'wanwisa', kind: 'count', url: 'https://www.tinkercad.com/things/i7v8JWWPScL-1-55-1', embed: false },
+      { id: 'fgg0VZS7w6G-stunning-waasa-kieran', title: 'Stunning Waasa-Kieran (แบบร่าง)', student: 'arisa', kind: 'draft', url: 'https://www.tinkercad.com/things/fgg0VZS7w6G-stunning-waasa-kieran', embed: false },
+      { id: 'bxNuSYgdx5m-funky-hillar-wolt', title: 'Funky Hillar-Wolt (แบบร่าง)', student: 'wiyada', kind: 'draft', url: 'https://www.tinkercad.com/things/bxNuSYgdx5m-funky-hillar-wolt', embed: false },
+      { id: '0iJAD0MD2Gt-powerful-juttuli-elzing', title: 'Powerful Juttuli-Elzing (แบบร่าง)', student: 'arisa', kind: 'draft', url: 'https://www.tinkercad.com/things/0iJAD0MD2Gt-powerful-juttuli-elzing', embed: false },
+      { id: 'lt81bJ52wdX-epic-gogo-densor', title: 'Epic Gogo-Densor (แบบร่าง)', student: 'wiyada', kind: 'draft', url: 'https://www.tinkercad.com/things/lt81bJ52wdX-epic-gogo-densor', embed: false },
+      { id: 'kMVTABPlZHn-fantastic-habbi', title: 'Fantastic Habbi (แบบร่าง)', student: 'arisa', kind: 'draft', url: 'https://www.tinkercad.com/things/kMVTABPlZHn-fantastic-habbi', embed: false },
+      { id: 'iEdhAJ4JBcc-terrific-luulia-crift', title: 'Terrific Luulia-Crift (แบบร่าง)', student: 'wanwisa', kind: 'draft', url: 'https://www.tinkercad.com/things/iEdhAJ4JBcc-terrific-luulia-crift', embed: false },
+      { id: 'fyg0PLDKlYY-2-', title: 'โปรแกรมเปิดไฟ 2 หลอด กระพริบ', student: 'arisa', kind: 'blink', url: 'https://www.tinkercad.com/things/fyg0PLDKlYY-2-', embed: false },
+      { id: 'aWYgsKGEUxM-', title: 'โปรแกรมเปิดปิดไฟสองหลอดแบบกระพริบ', student: 'wanwisa', kind: 'blink', url: 'https://www.tinkercad.com/things/aWYgsKGEUxM-', embed: false },
+      { id: 'kypuafZcRVP-', title: 'โปรแกรมเปิดปิดไฟสองหลอดแบบกระพริบ', student: 'wiyada', kind: 'blink', url: 'https://www.tinkercad.com/things/kypuafZcRVP-', embed: false },
+      { id: 'hEFgdKyOvNO-bodacious-tumelo', title: 'Bodacious Tumelo (แบบร่าง)', student: 'arisa', kind: 'draft', url: 'https://www.tinkercad.com/things/hEFgdKyOvNO-bodacious-tumelo', embed: false },
+      { id: 'avk6zxWNeIV-brilliant-curcan', title: 'Brilliant Curcan (แบบร่าง)', student: 'wiyada', kind: 'draft', url: 'https://www.tinkercad.com/things/avk6zxWNeIV-brilliant-curcan', embed: false }
+    ]
+  };
 
   return { img, th, pic, pa, ind, gallery, certs, policy, ethics, tinkercad };
 })();

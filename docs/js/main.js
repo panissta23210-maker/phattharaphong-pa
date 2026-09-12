@@ -328,34 +328,3 @@
   const cur = window.ATOM && window.ATOM.get(); if (cur) render(E.byZ[cur]);
   const picker = document.getElementById('picker'); if (picker) picker.dataset.in = 6;
 })();
-
-/* ===================== Tinkercad student works ===================== */
-(() => {
-  const grid = document.getElementById('tinkerGrid'); if (!grid) return;
-  const works = (window.PA && window.PA.tinkercad) || [];
-  if (!works.length) {
-    grid.innerHTML = `<div class="tk tk--empty"><b>กำลังรวบรวมผลงานนักเรียน</b><span>ผลงาน 3 มิติจาก Tinkercad ของนักเรียนจะแสดงในส่วนนี้ — เปิดหมุนดูได้จริง</span></div>`;
-    return;
-  }
-  const embedUrl = u => {
-    const m = String(u).match(/tinkercad\.com\/(?:things|embed)\/([A-Za-z0-9]+)/);
-    return m ? `https://www.tinkercad.com/embed/${m[1]}?editbtn=0` : u;
-  };
-  grid.innerHTML = works.map((w, i) => `
-    <article class="tk">
-      <div class="tk__frame" data-src="${embedUrl(w.url)}">
-        <button class="tk__cover" type="button" aria-label="โหลดโมเดล 3 มิติ ${w.title}">
-          ${w.img ? `<img src="${w.img}" alt="" loading="lazy">` : ''}
-          <span class="tk__play">▶ เปิดโมเดล 3 มิติ</span>
-        </button>
-      </div>
-      <div class="tk__body"><b>${w.title}</b><span>${w.student || ''}${w.level ? ' · ' + w.level : ''}${w.desc ? '<br>' + w.desc : ''}</span>
-        <a href="${w.url}" target="_blank" rel="noopener">เปิดใน Tinkercad</a></div>
-    </article>`).join('');
-  grid.addEventListener('click', e => {
-    const c = e.target.closest('.tk__cover'); if (!c) return;
-    const f = c.parentElement, ifr = document.createElement('iframe');
-    ifr.src = f.dataset.src; ifr.allowFullscreen = true; ifr.loading = 'lazy'; ifr.title = 'Tinkercad 3D model';
-    f.replaceChildren(ifr);
-  });
-})();
