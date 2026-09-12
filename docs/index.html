@@ -79,19 +79,25 @@
     </ul>
   </div>
   <aside class="picker" id="picker" aria-label="เลือกธาตุเพื่อเปลี่ยนแบบจำลองอะตอม">
-    <div class="picker__card" id="elCard" aria-live="polite">
-      <div class="picker__z"><span id="elZ">11</span><small>เลขอะตอม</small></div>
-      <div class="picker__sym" id="elSym">Na</div>
-      <div class="picker__name"><b id="elTh">โซเดียม</b><span id="elEn">Sodium</span></div>
-      <dl class="picker__meta">
-        <div><dt>เลขมวล</dt><dd id="elMass">23</dd></div>
+    <div class="pop" id="elCard" aria-live="polite">
+      <div class="pop__head">
+        <div class="pop__sym" id="elSym">Na</div>
+        <div class="pop__id">
+          <span class="pop__z"><i id="elZ">11</i> · <em id="elMass">23</em></span>
+          <b id="elTh">โซเดียม</b>
+          <span id="elEn" class="pop__en">Sodium</span>
+          <span id="elCat" class="pop__cat">โลหะแอลคาไล</span>
+        </div>
+      </div>
+      <dl class="pop__meta">
         <div><dt>โปรตอน / นิวตรอน</dt><dd id="elPN">11 / 12</dd></div>
         <div><dt>การจัดเรียงอิเล็กตรอน</dt><dd id="elShells">2, 8, 1</dd></div>
-        <div><dt>หมู่ธาตุ</dt><dd id="elCat">โลหะแอลคาไล</dd></div>
       </dl>
+      <p class="pop__quote" id="elQuote"></p>
+      <i class="pop__arrow" aria-hidden="true"></i>
     </div>
     <div class="picker__table" id="miniTable" role="group" aria-label="ตารางธาตุ 36 ธาตุแรก"></div>
-    <p class="picker__hint">แตะธาตุเพื่อเปลี่ยนอะตอม · แบบจำลองของบอร์ (Bohr Model) · ทอง = โปรตอน · ม่วง = นิวตรอน</p>
+    <p class="picker__hint">แตะธาตุเพื่อเปลี่ยนอะตอม · แบบจำลองของบอร์ · ทอง = โปรตอน · ม่วง = นิวตรอน</p>
   </aside>
   <div class="hero__scroll" aria-hidden="true"><span></span>เลื่อนเพื่ออ่าน</div>
 </section>

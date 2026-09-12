@@ -158,10 +158,10 @@
   function resize() {
     const w = canvas.clientWidth || innerWidth, h = canvas.clientHeight || innerHeight;
     renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
-    root.userData.baseScale = isMobile ? 0.46 : (w < 1100 ? 0.78 : 1.0);
+    root.userData.baseScale = isMobile ? 0.46 : (w < 1100 ? 0.8 : 1.02);
     applyScale();
-    root.position.x = isMobile ? 0 : (w < 1100 ? 2.6 : 3.9);
-    root.userData.baseY = isMobile ? 2.9 : 1.1;
+    root.position.x = isMobile ? 0 : (w < 1100 ? 3.6 : 5.5);
+    root.userData.baseY = isMobile ? 2.9 : 2.3;
   }
   function applyScale() {
     const el = window.ELEMENTS && window.ELEMENTS.byZ[root.userData.z];
@@ -205,7 +205,7 @@
     pMat.uniforms.uTime.value = spin;
     camera.position.x += (cur.x * 0.8 - camera.position.x) * 0.04;
     camera.position.y += (0.4 - cur.y * 0.5 - camera.position.y) * 0.04;
-    camera.lookAt(root.position.x * 0.55, 0.2, 0);
+    camera.lookAt(root.position.x * 0.6, 1.1, 0);
     renderer.render(scene, camera);
   }
 

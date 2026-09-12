@@ -314,9 +314,9 @@
     $id('elTh').textContent = el.th; $id('elEn').textContent = el.en;
     $id('elMass').textContent = el.mass; $id('elPN').textContent = `${el.z} / ${el.mass - el.z}`;
     $id('elShells').textContent = el.shells.join(', '); $id('elCat').textContent = el.catTh;
-    if (window.gsap && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      gsap.fromTo('#elSym', { y: 10, opacity: 0 }, { y: 0, opacity: 1, duration: .5, ease: 'expo.out' });
-    }
+    $id('elQuote').textContent = el.quote || '';
+    card.classList.remove('show'); void card.offsetWidth; card.classList.add('show');
+    const cell = cells[el.z]; if (cell) { const r = cell.getBoundingClientRect(), p = card.parentElement.getBoundingClientRect(); card.style.setProperty('--ax', Math.max(24, Math.min(p.width - 24, p.right - (r.left + r.width / 2))) + 'px'); }
   }
   document.getElementById('scene').addEventListener('atomchange', e => render(e.detail));
   // keyboard: arrows move between elements
