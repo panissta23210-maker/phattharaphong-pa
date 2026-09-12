@@ -406,20 +406,20 @@ body.ready .hero [data-in="5"]{transition-delay:.6s}
 .pel.active{background:var(--pc);color:var(--obsidian);border-color:transparent;box-shadow:0 0 18px -2px var(--pc)}
 .pel.active::before{color:rgba(7,5,13,.7)}
 .pel.gap{visibility:hidden;pointer-events:none}
-.picker__hint{font-size:11px;color:var(--ivory-mute);letter-spacing:.02em;margin:10px 0 0}
+.picker__hint{font-size:11px;color:var(--ivory-mute);letter-spacing:.02em;margin:12px 0 0;text-align:right}
 
-/* popup ป้ายธาตุ — เด้งออกทางซ้ายของตารางธาตุ */
-.pop{position:absolute;left:0;right:0;bottom:calc(100% + 18px);width:auto;padding:18px 20px 16px;border-radius:18px;
+/* popup ป้ายธาตุ — เด้งลงมาใต้ตารางธาตุ (ไม่บังอะตอม) */
+.pop{position:relative;margin-top:22px;width:100%;padding:16px 20px 14px;border-radius:18px;
   background:linear-gradient(160deg,rgba(27,22,80,.86),rgba(7,5,13,.92));border:1px solid rgba(230,194,122,.28);
   -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
   box-shadow:0 40px 80px -30px rgba(0,0,0,.95),0 0 60px -20px var(--el-c,var(--aura-soft)),inset 0 1px 0 rgba(255,255,255,.06);
-  transform-origin:right bottom;will-change:transform,opacity}
+  transform-origin:center top;will-change:transform,opacity}
 .pop__meta{grid-template-columns:1fr 1fr}
 .pop::before{content:"";position:absolute;left:18px;right:18px;top:0;height:1px;background:linear-gradient(90deg,transparent,var(--el-c,var(--gold)),transparent)}
 .pop.show{animation:popIn .55s var(--ease) both}
-@keyframes popIn{0%{opacity:0;transform:translateY(18px) scale(.94)}60%{opacity:1}100%{opacity:1;transform:none}}
-.pop__arrow{position:absolute;right:calc(var(--ax,60px) - 7px);bottom:-8px;transition:right .4s var(--ease);width:14px;height:14px;transform:rotate(45deg);
-  background:rgba(12,9,28,.96);border-right:1px solid rgba(230,194,122,.28);border-bottom:1px solid rgba(230,194,122,.28)}
+@keyframes popIn{0%{opacity:0;transform:translateY(-16px) scale(.94)}60%{opacity:1}100%{opacity:1;transform:none}}
+.pop__arrow{position:absolute;right:calc(var(--ax,60px) - 7px);top:-8px;transition:right .4s var(--ease);width:14px;height:14px;transform:rotate(45deg);
+  background:rgba(22,18,62,.97);border-left:1px solid rgba(230,194,122,.28);border-top:1px solid rgba(230,194,122,.28)}
 .pop__head{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center}
 .pop__sym{font-family:var(--font-d);font-size:60px;font-weight:600;line-height:.9;color:var(--el-c,var(--gold));
   text-shadow:0 0 28px var(--el-c,var(--aura-soft));min-width:74px}
@@ -440,9 +440,8 @@ body.ready .hero [data-in="5"]{transition-delay:.6s}
   .hero{grid-template-columns:1fr;padding-left:4vw;padding-right:4vw}
   .hero__inner{grid-column:1}
   .picker{grid-column:1;justify-self:stretch;width:100%;max-width:none;margin:34px auto 0}
-  .pop{position:static;width:100%;margin-bottom:14px;transform-origin:center top}
+  .pop{margin-top:16px}
   .pop__arrow{display:none}
-  @keyframes popIn{0%{opacity:0;transform:translateY(14px) scale(.97)}100%{opacity:1;transform:none}}
   .picker__table{gap:2px}
   .pel{border-radius:3px;font-size:9px}
   .pel::before{display:none}
