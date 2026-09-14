@@ -1,4 +1,5 @@
-/* scene.js — Bohr-model atom hero (Three.js r128). window.ATOM.set(Z) switches element. */
+/* scene.js — Bohr-model atom (Three.js r128). อยู่ด้านขวาใน hero แล้วค่อย ๆ กลายเป็นพื้นหลังหมุนช้า ๆ ทั้งหน้าเมื่อเลื่อนลง
+   window.ATOM.set(Z) switches element. */
 (() => {
   const canvas = document.getElementById('scene');
   if (!canvas || !window.THREE) return;
@@ -154,26 +155,30 @@
   addEventListener('pointermove', e => onMove(e.clientX, e.clientY), { passive: true });
   addEventListener('touchmove', e => { const t = e.touches[0]; if (t) onMove(t.clientX, t.clientY); }, { passive: true });
   let scrollY = 0; addEventListener('scroll', () => { scrollY = window.scrollY; }, { passive: true });
+  const lerp = (a, b, k) => a + (b - a) * k;
+  let bg = 0; // 0 = hero, 1 = พื้นหลังของเนื้อหา
 
   function resize() {
-    const w = canvas.clientWidth || innerWidth, h = canvas.clientHeight || innerHeight;
+    const w = innerWidth, h = innerHeight;
     renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
     root.userData.baseScale = isMobile ? 0.46 : (w < 1100 ? 0.8 : 1.02);
     applyScale();
-    root.position.x = isMobile ? 0 : (w < 1100 ? 3.6 : 5.5);
+    root.userData.heroX = isMobile ? 0 : (w < 1100 ? 3.6 : 5.5);
     root.userData.baseY = isMobile ? 2.9 : 2.3;
+    root.position.x = root.userData.heroX;
   }
   function applyScale() {
     const el = window.ELEMENTS && window.ELEMENTS.byZ[root.userData.z];
     const n = el ? el.shells.length : 3;
     const k = n > 3 ? 3 / n : (n < 2 ? 1.15 : 1);
-    root.scale.setScalar((root.userData.baseScale || 1) * k);
+    root.userData.fit = k;
+    root.scale.setScalar((root.userData.baseScale || 1) * k * lerp(1, isMobile ? 1.8 : 1.35, bg));
   }
   addEventListener('resize', resize); resize();
 
   const clock = new THREE.Clock();
-  let visible = true;
-  new IntersectionObserver(([e]) => { visible = e.isIntersecting; }, { threshold: 0 }).observe(canvas);
+  let visible = !document.hidden;
+  addEventListener('visibilitychange', () => { visible = !document.hidden; });
 
   const easeOut = x => 1 - Math.pow(1 - x, 3);
   function frame() {
@@ -183,6 +188,16 @@
     const dt = Math.min(0.05, clock.getDelta() || 0.016);
     cur.x += (target.x - cur.x) * 0.05; cur.y += (target.y - cur.y) * 0.05;
     const spin = reduce ? 0 : t;
+
+    // hero → background : เลื่อนผ่าน hero แล้วอะตอมย้ายมากลางจอ ขยาย จางลง และหมุนช้า ๆ อยู่หลังเนื้อหา
+    const p = Math.min(1, Math.max(0, (scrollY - innerHeight * 0.08) / (innerHeight * 0.75)));
+    const pe = p * p * (3 - 2 * p);
+    if (Math.abs(pe - bg) > 0.0005) {
+      bg = pe;
+      const o = 1 - bg * (isMobile ? 0.78 : 0.73);
+      canvas.style.opacity = o.toFixed(3);
+      applyScale();
+    }
 
     // swap transition
     if (swapping) {
@@ -194,9 +209,10 @@
       if (swapping.t >= 1) { if (swapping.prev) disposeGroup(swapping.prev); swapping = null; }
     }
 
-    root.rotation.y = spin * 0.12 + cur.x * 0.45;
-    root.rotation.x = cur.y * 0.3 + Math.sin(spin * 0.2) * 0.08;
-    root.position.y = (root.userData.baseY || 0.3) + Math.sin(spin * 0.6) * 0.12 - Math.min(scrollY, 900) * 0.0012;
+    root.rotation.y = spin * lerp(0.12, 0.22, bg) + cur.x * lerp(0.45, 0.2, bg);
+    root.rotation.x = cur.y * lerp(0.3, 0.12, bg) + Math.sin(spin * 0.2) * 0.08 + bg * 0.35;
+    root.position.x = lerp(root.userData.heroX || 0, isMobile ? 0 : 1.8, bg);
+    root.position.y = lerp(root.userData.baseY || 0.3, isMobile ? 0.4 : -0.2, bg) + Math.sin(spin * 0.6) * 0.12;
     if (nucleus) { nucleus.rotation.y = -spin * 0.5; nucleus.rotation.z = spin * 0.3; }
     rings.forEach(({ g, d, electrons }) => {
       g.rotation.z += reduce ? 0 : 0.0006;
@@ -205,7 +221,7 @@
     pMat.uniforms.uTime.value = spin;
     camera.position.x += (cur.x * 0.8 - camera.position.x) * 0.04;
     camera.position.y += (0.4 - cur.y * 0.5 - camera.position.y) * 0.04;
-    camera.lookAt(root.position.x * 0.6, 1.1, 0);
+    camera.lookAt(lerp((root.userData.heroX || 0) * 0.6, 0.9, bg), lerp(1.1, 0, bg), 0);
     renderer.render(scene, camera);
   }
 
