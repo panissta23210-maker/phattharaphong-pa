@@ -220,58 +220,106 @@
   lb.addEventListener('touchend', e => { const d = e.changedTouches[0].clientX - tx; if (Math.abs(d) > 50) (d < 0 ? $('[data-lbnext]') : $('[data-lbprev]')).click(); });
   bindLightbox();
 
-  /* ===================== Ambient music (Web Audio, generative) ===================== */
-  const audioBtn = $('#audioBtn');
-  let ac = null, master = null, timer = null, playing = false;
-  const chords = [ // Dorian-ish, warm & calm (Hz)
-    [130.81, 196.00, 233.08, 293.66, 349.23], // C  G  Bb D  F
-    [116.54, 174.61, 220.00, 261.63, 349.23], // Bb F  A  C  F
-    [146.83, 220.00, 261.63, 329.63, 392.00], // D  A  C  E  G
-    [98.00, 146.83, 196.00, 246.94, 293.66]   // G  D  G  B  D
-  ];
-  function note(freq, t, dur, gain, type = 'sine') {
-    const o = ac.createOscillator(), g = ac.createGain(), f = ac.createBiquadFilter();
-    o.type = type; o.frequency.value = freq; o.detune.value = (Math.random() - 0.5) * 8;
-    f.type = 'lowpass'; f.frequency.value = 900; f.Q.value = 0.6;
-    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(gain, t + dur * 0.35); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    o.connect(f).connect(g).connect(master); o.start(t); o.stop(t + dur + 0.1);
+  /* ===================== Background music (เสียงจากวิดีโอบทส่งท้าย) ===================== */
+  const audioBtn = $('#audioBtn'), bgm = $('#bgm'), fsBtn = $('#finaleSound'), video = $('#finaleVideo');
+  let playing = false, fadeTimer = null;
+  const TARGET = 0.85;
+  function fadeTo(v, ms, done) {
+    clearInterval(fadeTimer);
+    const from = bgm.volume, t0 = performance.now();
+    fadeTimer = setInterval(() => {
+      const p = Math.min(1, (performance.now() - t0) / ms);
+      bgm.volume = from + (v - from) * p;
+      if (p >= 1) { clearInterval(fadeTimer); done && done(); }
+    }, 40);
   }
-  function sparkle(t) {
-    const base = [523.25, 659.25, 783.99, 987.77, 1174.66];
-    for (let i = 0; i < 3; i++) note(base[Math.floor(Math.random() * base.length)], t + Math.random() * 6, 3.5, 0.012, 'triangle');
-  }
-  let bar = 0;
-  function schedule() {
-    const t = ac.currentTime + 0.1, ch = chords[bar % chords.length];
-    ch.forEach((f, i) => { note(f, t, 9, i === 0 ? 0.05 : 0.028, i === 0 ? 'triangle' : 'sine'); note(f * 2.002, t + 0.3, 8, 0.008); });
-    sparkle(t);
-    bar++;
-    timer = setTimeout(schedule, 7800);
-  }
-  function makeReverb() {
-    const len = ac.sampleRate * 3.2, buf = ac.createBuffer(2, len, ac.sampleRate);
-    for (let c = 0; c < 2; c++) { const d = buf.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.4); }
-    const cv = ac.createConvolver(); cv.buffer = buf; return cv;
+  function syncUI() {
+    audioBtn.setAttribute('aria-pressed', String(playing)); audioBtn.setAttribute('aria-label', playing ? 'ปิดเพลงบรรยากาศ' : 'เปิดเพลงบรรยากาศ');
+    $('.btn-audio__text', audioBtn).textContent = playing ? 'กำลังเล่น' : 'เปิดเพลง';
+    if (fsBtn) { fsBtn.setAttribute('aria-pressed', String(playing)); $('#finaleSoundText').textContent = playing ? 'ปิดเสียง' : 'เปิดเสียงวิดีโอ'; }
   }
   async function startAudio() {
-    if (!ac) {
-      ac = new (window.AudioContext || window.webkitAudioContext)();
-      master = ac.createGain(); master.gain.value = 0;
-      const rv = makeReverb(), wet = ac.createGain(), dry = ac.createGain(); wet.gain.value = 0.55; dry.gain.value = 0.7;
-      master.connect(dry).connect(ac.destination); master.connect(rv).connect(wet).connect(ac.destination);
-    }
-    if (ac.state === 'suspended') await ac.resume();
-    master.gain.cancelScheduledValues(ac.currentTime); master.gain.setTargetAtTime(0.9, ac.currentTime, 1.2);
-    schedule(); playing = true;
-    audioBtn.setAttribute('aria-pressed', 'true'); audioBtn.setAttribute('aria-label', 'ปิดเพลงบรรยากาศ'); $('.btn-audio__text', audioBtn).textContent = 'กำลังเล่น';
+    if (!bgm) return;
+    try {
+      bgm.volume = 0;
+      // ให้เสียงเดินตรงกับภาพเมื่อวิดีโอกำลังเล่นอยู่
+      if (video && !video.paused && isFinite(video.currentTime) && bgm.duration) bgm.currentTime = video.currentTime % bgm.duration;
+      await bgm.play();
+      playing = true; fadeTo(TARGET, 1400); syncUI();
+    } catch (e) { console.warn('bgm blocked', e); }
   }
   function stopAudio() {
-    if (!ac) return;
-    master.gain.setTargetAtTime(0, ac.currentTime, 0.8); clearTimeout(timer); playing = false;
-    audioBtn.setAttribute('aria-pressed', 'false'); audioBtn.setAttribute('aria-label', 'เปิดเพลงบรรยากาศ'); $('.btn-audio__text', audioBtn).textContent = 'เปิดเพลง';
+    if (!bgm) return;
+    playing = false; syncUI();
+    fadeTo(0, 700, () => bgm.pause());
   }
   audioBtn.addEventListener('click', () => playing ? stopAudio() : startAudio());
-  document.addEventListener('visibilitychange', () => { if (document.hidden && playing) { master.gain.setTargetAtTime(0, ac.currentTime, 0.5); } else if (!document.hidden && playing) { master.gain.setTargetAtTime(0.9, ac.currentTime, 1); } });
+  fsBtn && fsBtn.addEventListener('click', () => playing ? stopAudio() : startAudio());
+  document.addEventListener('visibilitychange', () => { if (!playing || !bgm) return; if (document.hidden) fadeTo(0, 400); else fadeTo(TARGET, 900); });
+  // วิดีโอ (ปิดเสียง) เล่นเฉพาะเมื่ออยู่ในสายตา
+  if (video) {
+    new IntersectionObserver(([e]) => { if (e.isIntersecting) video.play().catch(() => {}); else video.pause(); }, { threshold: 0.2 }).observe(video);
+    video.addEventListener('click', () => playing ? stopAudio() : startAudio());
+    // ปรับกรอบให้ตรงสัดส่วนจริงของวิดีโอ (แนวตั้งจากมือถือจะไม่ถูกครอป)
+    const fitFrame = () => { if (!video.videoWidth) return; const r = video.videoWidth / video.videoHeight; const fr = $('#finaleFrame'); fr.style.aspectRatio = r.toFixed(4); fr.classList.toggle('finale__frame--tall', r < 1); };
+    video.addEventListener('loadedmetadata', fitFrame); fitFrame();
+  }
+
+  /* ===================== Video popup ตอนเข้าเว็บ — เล่นจบหายเอง แล้วเพลงพื้นหลังเล่นต่อทันที ===================== */
+  (() => {
+    const pop = $('#vpop'), v = $('#vpopVideo'), tap = $('#vpopTap'), skip = $('#vpopSkip'), bar = $('#vpopBar');
+    if (!pop || !v) return;
+    let done = false;
+    document.body.classList.add('vpop-open');
+    const finish = () => {
+      if (done) return; done = true;
+      pop.classList.add('out'); document.body.classList.remove('vpop-open');
+      setTimeout(() => { v.pause(); v.removeAttribute('src'); v.load(); pop.remove(); }, 1000);
+      startAudio(); // เสียงพิณเล่นต่อเป็นพื้นหลังตั้งแต่แรก
+    };
+    v.addEventListener('ended', finish);
+    v.addEventListener('error', finish);
+    skip.addEventListener('click', finish);
+    v.addEventListener('timeupdate', () => { if (v.duration) bar.style.width = (v.currentTime / v.duration * 100).toFixed(2) + '%'; });
+    const unlock = () => { pop.classList.remove('needs-tap'); v.muted = false; v.currentTime = 0; v.play().catch(() => {}); };
+    tap.addEventListener('click', unlock);
+    (async () => {
+      v.muted = false;
+      try { await v.play(); }                         // เบราว์เซอร์อนุญาตเล่นพร้อมเสียงทันที
+      catch (e) {                                     // ถูกบล็อก: เล่นภาพแบบเงียบไว้ก่อน แล้วให้แตะเพื่อเปิดเสียง
+        v.muted = true; try { await v.play(); } catch (_) {}
+        pop.classList.add('needs-tap');
+      }
+    })();
+    // กันค้าง: ถ้าวิดีโอโหลดไม่ได้ภายใน 12 วิ ให้ปิดป๊อปอัพ
+    setTimeout(() => { if (!done && v.readyState < 2) finish(); }, 12000);
+  })();
+
+  /* ===================== Holo portrait : หมุน 3 มิติตามเมาส์ในบทประเด็นท้าทาย ===================== */
+  (() => {
+    const holo = $('#holo'), card = $('#holoCard'), zone = $('#challenge');
+    if (!holo || !card || !zone) return;
+    holo.classList.add('idle');
+    if (reduce || !fine) return;
+    let tx = 0, ty = 0, cx = 0, cy = 0, mx = 50, my = 40, cmx = 50, cmy = 40, active = false, raf = 0;
+    const MAXY = 16, MAXX = 12;
+    const loop = () => {
+      cx += (tx - cx) * 0.08; cy += (ty - cy) * 0.08; cmx += (mx - cmx) * 0.1; cmy += (my - cmy) * 0.1;
+      holo.style.setProperty('--ry', cx.toFixed(2) + 'deg'); holo.style.setProperty('--rx', cy.toFixed(2) + 'deg');
+      holo.style.setProperty('--mx', cmx.toFixed(1) + '%'); holo.style.setProperty('--my', cmy.toFixed(1) + '%');
+      if (active || Math.abs(cx - tx) > 0.05 || Math.abs(cy - ty) > 0.05) raf = requestAnimationFrame(loop);
+      else { raf = 0; if (!active) holo.classList.add('idle'); }
+    };
+    zone.addEventListener('pointermove', e => {
+      const r = card.getBoundingClientRect();
+      const nx = (e.clientX - (r.left + r.width / 2)) / (innerWidth * 0.5), ny = (e.clientY - (r.top + r.height / 2)) / (innerHeight * 0.5);
+      tx = Math.max(-1, Math.min(1, nx)) * MAXY; ty = -Math.max(-1, Math.min(1, ny)) * MAXX;
+      mx = Math.max(0, Math.min(100, ((e.clientX - r.left) / r.width) * 100)); my = Math.max(0, Math.min(100, ((e.clientY - r.top) / r.height) * 100));
+      if (!active) { active = true; holo.classList.remove('idle'); }
+      if (!raf) raf = requestAnimationFrame(loop);
+    }, { passive: true });
+    zone.addEventListener('pointerleave', () => { active = false; tx = 0; ty = 0; mx = 50; my = 40; if (!raf) raf = requestAnimationFrame(loop); });
+  })();
 
   /* ===================== GSAP scroll polish ===================== */
   if (window.gsap && window.ScrollTrigger && !reduce) {

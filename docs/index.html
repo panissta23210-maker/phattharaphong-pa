@@ -14,6 +14,19 @@
 </head>
 <body>
 <canvas class="bg-scene" id="scene" aria-hidden="true"></canvas>
+<!-- ===== Video popup ตอนเข้าเว็บ (เล่นจบแล้วหายเอง) ===== -->
+<div class="vpop" id="vpop" role="dialog" aria-modal="true" aria-label="วิดีโอแนะนำ Welcome to my cinematic life">
+  <div class="vpop__frame">
+    <video id="vpopVideo" src="assets/media/intro.mp4" poster="assets/media/intro-poster.jpg" playsinline preload="auto"></video>
+    <button class="vpop__tap" id="vpopTap" type="button" aria-label="แตะเพื่อเริ่มชมพร้อมเสียง">
+      <span class="vpop__play"><i></i></span>
+      <b>แตะเพื่อเริ่มชมพร้อมเสียง</b>
+      <small>Welcome to my cinematic life · ครูโอม</small>
+    </button>
+    <button class="vpop__skip" id="vpopSkip" type="button">ข้ามวิดีโอ →</button>
+    <div class="vpop__bar" aria-hidden="true"><i id="vpopBar"></i></div>
+  </div>
+</div>
 
 <!-- ===== Intro ===== -->
 <div class="intro" id="intro" aria-hidden="true">
@@ -162,9 +175,27 @@
     <p>Acid – Base Frontier : เมื่อห้องแล็บเสมือนบน Roblox จับมือกับปฏิบัติการเคมีแบบย่อส่วน</p>
   </div>
   <div class="challenge__grid">
+    <div class="challenge__aside">
     <a class="challenge__poster" href="assets/img/image120.jpg" data-lightbox data-cap="แผนภาพสรุปประเด็นท้าทาย (Research Challenge Issue)" data-tilt>
       <img src="assets/img/image120.jpg" alt="แผนภาพประเด็นท้าทาย การพัฒนาผลสัมฤทธิ์และทักษะปฏิบัติการเคมี กรด-เบส ผ่านสถานการณ์จำลองบน Roblox" loading="lazy" decoding="async">
     </a>
+      <figure class="holo" id="holo" aria-label="ครูภัทรพงษ์ มาตณาคุณ — ผู้จัดทำข้อตกลง">
+        <div class="holo__card" id="holoCard">
+          <div class="holo__layer holo__photo"><img src="assets/img/portrait.jpg" alt="ครูภัทรพงษ์ มาตณาคุณ ยืนยิ้มในชุดสูทที่สนามบาสเกตบอลของโรงเรียน" loading="lazy" decoding="async" width="732" height="1100"></div>
+          <div class="holo__layer holo__grid" aria-hidden="true"></div>
+          <div class="holo__layer holo__frame" aria-hidden="true"></div>
+          <div class="holo__layer holo__shine" aria-hidden="true"></div>
+          <div class="holo__layer holo__chips" aria-hidden="true">
+            <span class="holo__chip holo__chip--a"><i>Cr</i>ครูโอม · ครูเคมี</span>
+            <span class="holo__chip holo__chip--b"><i>C++</i>Arduino · Roblox</span>
+            <span class="holo__chip holo__chip--c"><i>pH</i>Acid – Base Frontier</span>
+          </div>
+          <figcaption class="holo__cap"><b>นายภัทรพงษ์ มาตณาคุณ</b><span>ผู้จัดทำข้อตกลง · ครูเคมีที่เขียนโปรแกรมเป็น</span></figcaption>
+        </div>
+        <div class="holo__shadow" aria-hidden="true"></div>
+        <p class="holo__hint">เลื่อนเมาส์เพื่อหมุนภาพ</p>
+      </figure>
+    </div>
     <div class="challenge__body">
       <h3>การพัฒนาผลสัมฤทธิ์ทางการเรียนและทักษะปฏิบัติการเคมี เรื่อง กรด – เบส ของนักเรียนชั้น ม.5 โดยใช้รูปแบบการสอนเชิงรุกผ่านสถานการณ์จำลองบน Roblox ร่วมกับปฏิบัติการเคมีแบบย่อส่วน</h3>
       <div class="formula" aria-hidden="true">
@@ -195,11 +226,11 @@
     </div>
     <div class="posters__grid">
       <a class="poster" href="assets/img/challenge_poster.jpg" data-lightbox data-cap="โปสเตอร์ประเด็นท้าทาย — การพัฒนาผลสัมฤทธิ์ทางการเรียนและทักษะปฏิบัติการเคมี เรื่อง กรด – เบส ของนักเรียนชั้น ม.5 ด้วย Roblox + Microscale Chemistry" data-tilt>
-        <span class="poster__pic"><img src="assets/img/thumbs/challenge_poster.jpg" alt="โปสเตอร์ประเด็นท้าทาย กรด – เบส Roblox ร่วมกับ Microscale Chemistry" loading="lazy" decoding="async" width="720" height="1018"></span>
+        <span class="poster__pic"><img src="assets/img/thumbs/challenge_poster.jpg" alt="โปสเตอร์ประเด็นท้าทาย กรด – เบส Roblox ร่วมกับ Microscale Chemistry" loading="lazy" decoding="async" width="720" height="1081"></span>
         <span class="poster__cap"><b>โปสเตอร์ประเด็นท้าทาย</b><small>ครูเคมีผสมครูคอม · เรียนรู้ผ่านเกมในโลกเสมือน · ปลอดภัย ประหยัด เป็นมิตรต่อสิ่งแวดล้อม</small></span>
       </a>
       <a class="poster" href="assets/img/challenge_info.jpg" data-lightbox data-cap="อินโฟกราฟิกข้อตกลงในการพัฒนางานที่เสนอเป็นประเด็นท้าทาย — สภาพปัญหา วิธีดำเนินการ ผลลัพธ์ที่คาดหวัง และความสอดคล้องกับนโยบาย สพฐ. 2569" data-tilt>
-        <span class="poster__pic"><img src="assets/img/thumbs/challenge_info.jpg" alt="อินโฟกราฟิกประเด็นท้าทาย สภาพปัญหา วิธีดำเนินการ ผลลัพธ์ที่คาดหวัง ความสอดคล้องนโยบาย" loading="lazy" decoding="async" width="720" height="1018"></span>
+        <span class="poster__pic"><img src="assets/img/thumbs/challenge_info.jpg" alt="อินโฟกราฟิกประเด็นท้าทาย สภาพปัญหา วิธีดำเนินการ ผลลัพธ์ที่คาดหวัง ความสอดคล้องนโยบาย" loading="lazy" decoding="async" width="720" height="1081"></span>
         <span class="poster__cap"><b>อินโฟกราฟิกข้อตกลง (Challenge Issue)</b><small>สภาพปัญหา · วิธีดำเนินการ 5 ขั้น · ผลลัพธ์เชิงปริมาณ/คุณภาพ · สอดคล้องนโยบาย สพฐ. 2569</small></span>
       </a>
     </div>
@@ -300,6 +331,19 @@
 
 <!-- ===== Closing ===== -->
 <section class="closing" id="closing">
+  <div class="finale" id="finale">
+    <div class="finale__head">
+      <span class="chapter__num">บทส่งท้าย</span>
+      <h2>เสียงพิณจากครูโอม</h2>
+      <p>ครูเคมีที่เขียนโปรแกรม และดีดพิณอีสาน — ดนตรีท้องถิ่นในเสียงของครูเอง เสียงพิณจากวิดีโอนี้คือดนตรีพื้นหลังของทั้งเว็บไซต์ เปิด/ปิดได้ที่ปุ่ม "เปิดเพลง" ด้านบน หรือแตะที่วิดีโอ</p>
+    </div>
+    <figure class="finale__frame" id="finaleFrame">
+      <video class="finale__video" id="finaleVideo" src="assets/media/finale.mp4" poster="assets/media/finale-poster.jpg" muted loop playsinline autoplay preload="metadata" aria-label="วิดีโอบทส่งท้าย — ครูภัทรพงษ์ดีดพิณ"></video>
+      <div class="finale__veil" aria-hidden="true"></div>
+      <button class="finale__sound" id="finaleSound" type="button" aria-pressed="false" data-magnet><span class="btn-audio__bars"><i></i><i></i><i></i><i></i></span><span id="finaleSoundText">เปิดเสียงวิดีโอ</span></button>
+    </figure>
+  </div>
+  <audio id="bgm" src="assets/media/finale.mp3" loop preload="none"></audio>
   <div class="closing__inner">
     <p class="closing__quote">"มากกว่าการเรียน คือการสร้างชีวิตที่มั่นคง"</p>
     <p class="closing__sign">ขอรับรองว่ารายงานผลการปฏิบัติงานฉบับนี้เป็นความจริงทุกประการ<br><b>นายภัทรพงษ์ มาตณาคุณ</b><br>ตำแหน่ง ครู โรงเรียนโคกคอนวิทยาคม · 11 กันยายน 2569</p>
